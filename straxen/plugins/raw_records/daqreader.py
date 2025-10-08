@@ -372,7 +372,7 @@ class DAQReader(strax.Plugin):
             # Print data rate / data type if any
             if r._mbs() > 0:
                 print(f"\t{r}")
-        return result['raw_records ']
+        return result['raw_records']
 
 
 @export
