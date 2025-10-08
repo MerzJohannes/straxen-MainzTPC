@@ -100,39 +100,18 @@ class DAQReader(strax.Plugin):
 
     Provides:
      - raw_records: (tpc)raw_records.
-     - raw_records_he: raw_records for the high energy boards
-       digitizing the top PMT-array at lower amplification.
-     - raw_records_nv: neutron veto raw_records; only stored temporary
-       as the software coincidence trigger not applied yet.
-     - raw_records_mv: muon veto raw_records.
-     - raw_records_aqmon: raw_records for the acquisition monitor (_nv
-       for neutron veto).
 
     """
 
-    provides: Tuple[str, ...] = (
-        "raw_records",
-        "raw_records_he",  # high energy
-        "raw_records_aqmon",
-        "raw_records_nv",  # nveto raw_records (will not be stored long term)
-        "raw_records_aqmon_nv",
-        "raw_records_aux_mv",
-        "raw_records_mv",  # mveto has to be last due to lineage
-    )
+    provides = ("raw_records",)
 
-    data_kind = immutabledict(zip(provides, provides))
+    data_kind = {k: k for k in provides}
     depends_on: Tuple = tuple()
     parallel = "process"
     rechunk_on_load = True
     chunk_source_size_mb = strax.DEFAULT_CHUNK_SIZE_MB  # 200 MB
     rechunk_on_save = immutabledict(
         raw_records=False,
-        raw_records_he=False,
-        raw_records_aqmon=True,
-        raw_records_nv=False,
-        raw_records_aqmon_nv=True,
-        raw_records_aux_mv=True,
-        raw_records_mv=False,
     )
     chunk_target_size_mb = 500
     compressor = "lz4"
@@ -140,10 +119,9 @@ class DAQReader(strax.Plugin):
     input_timeout = 300
 
     def infer_dtype(self):
-        return {
-            d: strax.raw_record_dtype(samples_per_record=self.config["record_length"])
-            for d in self.provides
-        }
+        dtype = strax.raw_record_dtype(samples_per_record=self.config["record_length"])
+        return dtype
+
 
     def setup(self):
         self.t0 = int(self.config["run_start_time"]) * int(1e9)
@@ -394,7 +372,7 @@ class DAQReader(strax.Plugin):
             # Print data rate / data type if any
             if r._mbs() > 0:
                 print(f"\t{r}")
-        return result
+        return result['raw_records ']
 
 
 @export
