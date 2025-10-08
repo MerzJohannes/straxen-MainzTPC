@@ -32,8 +32,8 @@ from . import contexts
 from . import test_utils
 from .test_utils import *
 
-from . import docs_utils
-from .docs_utils import *
+#from . import docs_utils
+#from .docs_utils import *
 
 from . import daq_core
 
